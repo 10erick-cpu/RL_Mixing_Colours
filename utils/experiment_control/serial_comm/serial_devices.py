@@ -69,7 +69,7 @@ class SerialDevice(object):
 
         # self.logger.debug("Writing %s" % data_bytes)
         start = time.time()
-        print("tx", data_bytes)
+        #print("tx", data_bytes)
         self.connection.write(data_bytes)
         delta = time.time() - start
         # self.logger.debug("writing to socket took {}s".format(delta))
@@ -84,7 +84,7 @@ class SerialDevice(object):
             self.connect()
 
         data = self.connection.read_until(eol_char.encode("UTF-8"))
-        print("rcv", data)
+        #print("rcv", data)
         if auto_decode:
             data = data.decode("utf-8")
         data = data if len(data) > 0 else None

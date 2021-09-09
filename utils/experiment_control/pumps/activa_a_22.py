@@ -4,11 +4,14 @@ from utils.experiment_control.pumps.pump_interface import PumpInterface, Validat
 
 
 class AdoxActivaA22(PumpInterface):
+    _CMD_STR_BEGIN = "<"
+    _CMD_STR_END = ">"
     MAX_INF_LEVEL = 500
-    _CMD_START = '<<J000R>\n'
-    _CMD_STOP = '<<J000S>\n'
-    _CMD_SET_INF_LVL = '<<J000F>\n'
-    _CMD_SET_INF_LEVEL_TEMPL = "<<J000F{0:04d}.{1:s}>\n"
+    _CMD_START = 'J000R'
+    _CMD_STOP = 'J000S'
+    _CMD_SET_INF_LVL = 'J000F'
+    _CMD_SET_INF_LEVEL_TEMPL = "J000F{0:04d}.{1:s}"
+    _CMD_STATUS="J000"
 
     def __init__(self, serial_device, print_changes=True):
         PumpInterface.__init__(self, serial_device)
@@ -35,6 +38,9 @@ class AdoxActivaA22(PumpInterface):
         self.__disable()
         self.__set_transfusion_param(0)
 
+    def _to_serial_cmd(self, cmd_str):
+        return self._CMD_STR_BEGIN + cmd_str + self._CMD_STR_END
+
     def __set_transfusion_param(self, level):
         if level < 0 or level > self.MAX_INF_LEVEL:
             print("WARNING: setting invalid inf level", level)
@@ -49,18 +55,18 @@ class AdoxActivaA22(PumpInterface):
 
         self.curr_ul_min = level
 
-        r = self.device.send_data(cmd, receive_data=True, receive_eol="F")
-        print(r)
+        r = self.device.send_data(self._to_serial_cmd(cmd), receive_data=True, receive_eol="F")
+        # print(r)
         return r
 
     def get_current_inf_param(self):
         inf_idx = 0
-        data = self.device.send_data("<J000>", receive_data=True, receive_eol=">")
+        data = self.device.send_data(self._to_serial_cmd(self._CMD_STATUS), receive_data=True, receive_eol=">")
         while "F" not in data:
-            data = self.device.send_data("<J000>", receive_data=True, receive_eol=">")
+            data = self.device.send_data(self._to_serial_cmd(self._CMD_STATUS), receive_data=True, receive_eol=">")
             inf_idx += 1
-        print(data)
-        print(inf_idx)
+        # print(data)
+        # print(inf_idx)
         inf_lvl = self.cmd_to_value(data)
         return inf_lvl
 

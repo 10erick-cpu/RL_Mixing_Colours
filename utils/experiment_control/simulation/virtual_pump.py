@@ -64,6 +64,9 @@ class VirtualAdoxActivaA22(AdoxActivaA22):
             for handler_key, handler in self.handlers.items():
                 if handler_key in data:
                     handler(port, data)
+                    return
+
+            raise ValueError("No handler for port/data", port, data)
 
         @staticmethod
         def default():
